@@ -91,6 +91,13 @@ data AppConfig = AppConfig {
 
   , configRootSpec          :: Maybe Text
   , configRawMediaTypes     :: [B.ByteString]
+
+  , configApiPath           :: Text
+  , configStaticPath        :: Text
+  , configStaticDir         :: Text
+  , configAppFile           :: Text
+  , configAdminPath         :: Text
+  , configAdminFile         :: Text
   }
 
 configPoolTimeout' :: (Fractional a) => AppConfig -> a
@@ -172,6 +179,12 @@ readOptions = do
         <*> (maybe ["public"] splitOnCommas <$> optValue "db-extra-search-path")
         <*> optString "root-spec"
         <*> (maybe [] (fmap encodeUtf8 . splitOnCommas) <$> optValue "raw-media-types")
+        <*> (fromMaybe "" <$> optString "api-path")
+        <*> (fromMaybe "" <$> optString "static-path")
+        <*> (fromMaybe "static" <$> optString "static-dir")
+        <*> (fromMaybe "index.html" <$> optString "app-file")
+        <*> (fromMaybe "admin" <$> optString "admin-path")
+        <*> (fromMaybe "admin.html" <$> optString "admin-file")
 
     parseSocketFileMode :: C.Key -> C.Parser C.Config (Either Text FileMode)
     parseSocketFileMode k =
@@ -299,6 +312,24 @@ readOptions = do
           |
           |## content types to produce raw output
           |# raw-media-types="image/png, image/jpg"
+          |
+          |## Api base path
+          |# api-path=""
+          |
+          |## static assets url path
+          |# static-path=""
+          |
+          |## static assets directory
+          |# static-dir="static"
+          |
+          |## your frontend app main file
+          |# app-file="index.html"
+          |
+          |## your admin app url path
+          |# admin-path="admin"
+          |
+          |## your admin app main file
+          |# admin-file="admin.html"
           |]
 
 pathParser :: Parser FilePath

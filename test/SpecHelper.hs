@@ -86,6 +86,7 @@ _baseCfg =  -- Connection Settings
             Nothing
             -- Raw output media types
             []
+            "api" "" "static" "index.html" "admin" "admin.html"
 
 testCfg :: Text -> AppConfig
 testCfg testDbConn = _baseCfg { configDatabase = testDbConn }

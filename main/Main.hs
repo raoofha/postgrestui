@@ -16,7 +16,8 @@ import Data.Either.Combinators  (whenLeft)
 import Data.IORef               (IORef, atomicWriteIORef, newIORef,
                                  readIORef)
 import Data.String              (IsString (..))
-import Data.Text                (pack, replace, strip, stripPrefix)
+import Data.Text                (pack, replace, strip, stripPrefix,
+                                 unpack)
 import Data.Text.IO             (hPutStrLn)
 import Data.Time.Clock          (getCurrentTime)
 import Network.Wai.Handler.Warp (defaultSettings, runSettings,
@@ -42,6 +43,10 @@ import System.Posix.Signals
 import UnixSocket
 #endif
 
+import qualified Network.HTTP.Types.Status     as HT
+import           Network.Wai
+import           Network.Wai.Middleware.Static
+import           Prelude                       (head, tail)
 
 {-|
   The purpose of this worker is to fill the refDbStructure created in 'main'
@@ -245,13 +250,13 @@ main = do
   -- run the postgrest application with user defined socket. Only for UNIX systems.
 #ifndef mingw32_HOST_OS
   whenJust maybeSocketAddr $
-    runAppInSocket appSettings postgrestApplication socketFileMode
+    runAppInSocket appSettings (postgrestui conf postgrestApplication) socketFileMode
 #endif
 
   -- run the postgrest application
   whenNothing maybeSocketAddr $ do
     putStrLn $ ("Listening on port " :: Text) <> show (configPort conf)
-    runSettings appSettings postgrestApplication
+    runSettings appSettings (postgrestui conf postgrestApplication)
 
 {-|
   The purpose of this function is to load the JWT secret from a file if
@@ -328,3 +333,27 @@ whenJust Nothing _  = pass
 whenNothing :: Applicative f => Maybe a -> f () -> f ()
 whenNothing Nothing f = f
 whenNothing _       _ = pass
+
+postgrestui :: AppConfig -> Middleware
+postgrestui conf app req send = do
+  let pathname = pathInfo req
+  let apiPath = configApiPath conf
+  let staticPath = configStaticPath conf
+  let staticDir  = unpack (configStaticDir  conf)
+  let adminPath = configAdminPath conf
+  let adminFile = unpack (configAdminFile conf)
+  let appFile = unpack (configAppFile conf)
+  let otherwiseFn _ ssend = ssend (responseFile HT.status200 [("Content-Type", "text/html")] appFile Nothing)
+  if apiPath == "" then
+    app req send
+  else if pathname /= [] && head pathname == apiPath then
+    app (req {pathInfo = tail pathname}) send
+  else if staticPath == "" then
+    staticPolicy (addBase staticDir) otherwiseFn req send
+  else if pathname /= [] && head pathname == staticPath then
+    staticPolicy (addBase staticDir) otherwiseFn (req {pathInfo = tail pathname}) send
+  else if pathname /= [] && head pathname == adminPath then
+    send (responseFile HT.status200 [("Content-Type", "text/html")] adminFile Nothing)
+  else
+    otherwiseFn req send
+

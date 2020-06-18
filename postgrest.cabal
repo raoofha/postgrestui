@@ -1,5 +1,5 @@
 name:               postgrest
-version:            7.0.1
+version:            7.0.1.0
 synopsis:           REST API for any Postgres database
 description:        Reads the schema of a PostgreSQL database and creates RESTful routes
                     for the tables and views, supporting all HTTP verbs that security
@@ -10,14 +10,14 @@ author:             Joe Nelson, Adam Baker, Steve Chavez
 maintainer:         Steve Chavez <stevechavezast@gmail.com>
 category:           Executable, PostgreSQL, Network APIs
 homepage:           https://postgrest.org
-bug-reports:        https://github.com/PostgREST/postgrest/issues
+bug-reports:        https://github.com/raoofha/postgrestui/issues
 build-type:         Simple
 extra-source-files: CHANGELOG.md
 cabal-version:      >= 1.10
 
 source-repository head
   type:     git
-  location: git://github.com/PostgREST/postgrest.git
+  location: git://github.com/raoofha/postgrestui.git
 
 flag ci
   default:     False
@@ -116,6 +116,8 @@ executable postgrest
                     , time              >= 1.6 && < 1.11
                     , wai               >= 3.2.1 && < 3.3
                     , warp              >= 3.2.12 && < 3.4
+                    , wai-middleware-static     >= 0.8.1 && < 0.9
+                    , http-types                >= 0.12.2 && < 0.13
   default-language:   Haskell2010
   default-extensions: OverloadedStrings
                       QuasiQuotes

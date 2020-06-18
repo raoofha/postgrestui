@@ -65,6 +65,7 @@ script:
     END='## \['
     BODY=$(sed -n "1,/$START/d;/$END/q;p" CHANGELOG.md)
     strip postgrest
-    tar cJf postgrest-$TRAVIS_TAG-osx.tar.xz postgrest
-    ghr -t $GITHUB_TOKEN -u $OWNER -r $REPO -b "$BODY"--replace $TRAVIS_TAG postgrest-$TRAVIS_TAG-osx.tar.xz
+    mv postgrest postgrestui
+    tar cJf postgrestui-$TRAVIS_TAG-osx.tar.xz postgrestui
+    ghr -t $GITHUB_TOKEN -u $OWNER -r $REPO -b "$BODY"--replace $TRAVIS_TAG postgrestui-$TRAVIS_TAG-osx.tar.xz
   fi

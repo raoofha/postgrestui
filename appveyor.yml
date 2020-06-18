@@ -26,11 +26,12 @@ build_script:
 - stack setup --no-terminal > nul
 # Appveyor has a timeout of 60 mins, building can take longer, limit the time and make sure this succeeds,
 # previous work will get cached and finish on next commit
-- bash -lc "timeout 2700 'C:\projects\postgrest\stack.exe' build -j1 --copy-bins --local-bin-path . || true"
+- bash -lc "timeout 2700 'C:\projects\postgrestui\stack.exe' build -j1 --copy-bins --local-bin-path . || true"
 
 artifacts:
 - path: postgrest.exe
 
 deploy_script:
-- IF DEFINED APPVEYOR_REPO_TAG_NAME 7z a -tzip postgrest-%APPVEYOR_REPO_TAG_NAME%-windows-x64.zip postgrest.exe
-- IF DEFINED APPVEYOR_REPO_TAG_NAME bash -lc " exec 0</dev/null && cd $APPVEYOR_BUILD_FOLDER && ghr -t $GITHUB_TOKEN -u $APPVEYOR_ACCOUNT_NAME -r $APPVEYOR_PROJECT_NAME -b \"$(sed -n \"1,/$(echo $APPVEYOR_REPO_TAG_NAME | cut -c2-)/d;/## \[/q;p\" CHANGELOG.md)\" --replace $APPVEYOR_REPO_TAG_NAME postgrest-$APPVEYOR_REPO_TAG_NAME-windows-x64.zip"
+- mv postgrest.exe postgrestui.exe
+- IF DEFINED APPVEYOR_REPO_TAG_NAME 7z a -tzip postgrestui-%APPVEYOR_REPO_TAG_NAME%-windows-x64.zip postgrestui.exe
+- IF DEFINED APPVEYOR_REPO_TAG_NAME bash -lc " exec 0</dev/null && cd $APPVEYOR_BUILD_FOLDER && ghr -t $GITHUB_TOKEN -u $APPVEYOR_ACCOUNT_NAME -r $APPVEYOR_PROJECT_NAME -b \"$(sed -n \"1,/$(echo $APPVEYOR_REPO_TAG_NAME | cut -c2-)/d;/## \[/q;p\" CHANGELOG.md)\" --replace $APPVEYOR_REPO_TAG_NAME postgrestui-$APPVEYOR_REPO_TAG_NAME-windows-x64.zip"
